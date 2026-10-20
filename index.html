@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAP - The Sleep Game</title>
+<style>
+body{margin:0;background:#0f172a;color:white;font-family:sans-serif;text-align:center;overflow:hidden}
+#game{position:relative;width:100vw;height:80vh;background:linear-gradient(#1e293b,#0f172a);overflow:hidden}
+.player{position:absolute;bottom:20px;left:50%;width:60px;height:60px;font-size:50px;transform:translateX(-50%)}
+.item{position:absolute;top:-50px;font-size:30px}
+#score{font-size:24px;padding:10px}
+button{padding:15px 30px;font-size:20px;background:#8b5cf6;color:white;border:none;border-radius:10px;margin:10px}
+</style>
+</head>
+<body>
+<h1>😴 NAP</h1>
+<div id="score">Score: 0 | Catch Zzz, Avoid ⏰</div>
+<div id="game"><div class="player" id="player">😪</div></div>
+<button onclick="startGame()">PLAY / RESTART</button>
+<p>Move: Touch left/right side of game</p>
+<script>
+let score=0,gameOn=false,playerX=50,items=[],gameEl=document.getElementById('game'),playerEl=document.getElementById('player');
+function startGame(){score=0;items=[];gameOn=true;document.querySelectorAll('.item').forEach(e=>e.remove());loop();spawnLoop();}
+function spawnLoop(){if(!gameOn)return;let el=document.createElement('div');el.className='item';let isZ=Math.random()>0.3;el.textContent=isZ?'💤':'⏰';el.dataset.type=isZ?'z':'alarm';el.style.left=Math.random()*90+'%';gameEl.appendChild(el);items.push({el,y:-50,x:parseFloat(el.style.left),type:el.dataset.type});setTimeout(spawnLoop,800-Math.min(score*5,600));}
+function loop(){if(!gameOn)return;items.forEach((it,i)=>{it.y+=3+score*0.1;it.el.style.top=it.y+'px';if(it.y>gameEl.clientHeight-80 && Math.abs(it.x-playerX)<8){if(it.type==='z'){score++;}else{gameOn=false;alert('Woke up! Score: '+score);}it.el.remove();items.splice(i,1);}if(it.y>gameEl.clientHeight){it.el.remove();items.splice(i,1);}});document.getElementById('score').textContent='Score: '+score+' | Catch Zzz, Avoid ⏰';if(gameOn)requestAnimationFrame(loop);}
+gameEl.addEventListener('touchmove',e=>{let r=gameEl.getBoundingClientRect();playerX=((e.touches[0].clientX-r.left)/r.width)*100;playerEl.style.left=playerX+'%';});
+gameEl.addEventListener('mousemove',e=>{let r=gameEl.getBoundingClientRect();playerX=((e.clientX-r.left)/r.width)*100;playerEl.style.left=playerX+'%';});
+</script>
+</body>
+  </html>
