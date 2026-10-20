@@ -1,30 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NAP - The Sleep Game</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Free Fire 2019</title>
 <style>
-body{margin:0;background:#0f172a;color:white;font-family:sans-serif;text-align:center;overflow:hidden}
-#game{position:relative;width:100vw;height:80vh;background:linear-gradient(#1e293b,#0f172a);overflow:hidden}
-.player{position:absolute;bottom:20px;left:50%;width:60px;height:60px;font-size:50px;transform:translateX(-50%)}
-.item{position:absolute;top:-50px;font-size:30px}
-#score{font-size:24px;padding:10px}
-button{padding:15px 30px;font-size:20px;background:#8b5cf6;color:white;border:none;border-radius:10px;margin:10px}
+body{margin:0;background:#1a1a1a;color:white;font-family:Arial;overflow:hidden;touch-action:none}
+#ui{position:absolute;top:0;left:0;right:0;padding:8px;display:flex;justify-content:space-between;background:rgba(0,0,0,0.7);z-index:10}
+#game{position:relative;width:100vw;height:100vh;background:linear-gradient(#4a8f29,#2d5a1a);overflow:hidden}
+#player{position:absolute;width:40px;height:40px;background:#ffcc00;border-radius:50%;border:3px solid #000;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;justify-content:center;font-size:20px}
+.enemy{position:absolute;width:35px;height:35px;background:#ff3300;border-radius:50%;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bullet{position:absolute;width:8px;height:8px;background:yellow;border-radius:50%;box-shadow:0 0 5px yellow}
+#joystick{position:absolute;bottom:30px;left:30px;width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;z-index:10}
+#stick{position:absolute;width:40px;height:40px;background:rgba(255,255,255,0.5);border-radius:50%;left:30px;top:30px}
+#fireBtn{position:absolute;bottom:40px;right:30px;width:80px;height:80px;background:rgba(255,0,0,0.6);border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:10}
+#health{color:#00ff00}
 </style>
 </head>
 <body>
-<h1>😴 NAP</h1>
-<div id="score">Score: 0 | Catch Zzz, Avoid ⏰</div>
-<div id="game"><div class="player" id="player">😪</div></div>
-<button onclick="startGame()">PLAY / RESTART</button>
-<p>Move: Touch left/right side of game</p>
+<div id="ui"><div>FF 2019 - Score: <span id="score">0</span></div><div id="health">HP: 100</div><div>Enemies: <span id="ec">0</span></div></div>
+<div id="game">
+<div id="player">🔫</div>
+<div id="joystick"><div id="stick"></div></div>
+<div id="fireBtn">💥</div>
+</div>
 <script>
-let score=0,gameOn=false,playerX=50,items=[],gameEl=document.getElementById('game'),playerEl=document.getElementById('player');
-function startGame(){score=0;items=[];gameOn=true;document.querySelectorAll('.item').forEach(e=>e.remove());loop();spawnLoop();}
-function spawnLoop(){if(!gameOn)return;let el=document.createElement('div');el.className='item';let isZ=Math.random()>0.3;el.textContent=isZ?'💤':'⏰';el.dataset.type=isZ?'z':'alarm';el.style.left=Math.random()*90+'%';gameEl.appendChild(el);items.push({el,y:-50,x:parseFloat(el.style.left),type:el.dataset.type});setTimeout(spawnLoop,800-Math.min(score*5,600));}
-function loop(){if(!gameOn)return;items.forEach((it,i)=>{it.y+=3+score*0.1;it.el.style.top=it.y+'px';if(it.y>gameEl.clientHeight-80 && Math.abs(it.x-playerX)<8){if(it.type==='z'){score++;}else{gameOn=false;alert('Woke up! Score: '+score);}it.el.remove();items.splice(i,1);}if(it.y>gameEl.clientHeight){it.el.remove();items.splice(i,1);}});document.getElementById('score').textContent='Score: '+score+' | Catch Zzz, Avoid ⏰';if(gameOn)requestAnimationFrame(loop);}
-gameEl.addEventListener('touchmove',e=>{let r=gameEl.getBoundingClientRect();playerX=((e.touches[0].clientX-r.left)/r.width)*100;playerEl.style.left=playerX+'%';});
-gameEl.addEventListener('mousemove',e=>{let r=gameEl.getBoundingClientRect();playerX=((e.clientX-r.left)/r.width)*100;playerEl.style.left=playerX+'%';});
+let score=0,hp=100,px=50,py=50;
+let player=document.getElementById('player');
+let game=document.getElementById('game');
+let enemies=[],bullets=[];
+let isMoving=false,mx=0,my=0;
+
+let joy=document.getElementById('joystick');
+let stick=document.getElementById('stick');
+joy.addEventListener('touchstart',e=>{isMoving=true});
+joy.addEventListener('touchmove',e=>{
+let rect=joy.getBoundingClientRect();
+let x=e.touches[0].clientX-rect.left-50;
+let y=e.touches[0].clientY-rect.top-50;
+let dist=Math.sqrt(x*x+y*y);
+if(dist>35){x=x/dist*35;y=y/dist*35}
+stick.style.left=(30+x)+'px'; stick.style.top=(30+y)+'px';
+mx=x/35; my=y/35;
+});
+joy.addEventListener('touchend',()=>{isMoving=false;mx=0;my=0;stick.style.left='30px';stick.style.top='30px'});
+
+function gameLoop(){
+if(isMoving){
+px+=mx*2; py+=my*2;
+if(px<5)px=5;if(px>95)px=95;if(py<15)py=15;if(py>85)py=85;
+player.style.left=px+'%';player.style.top=py+'%';
+}
+requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+document.getElementById('fireBtn').addEventListener('touchstart',shoot);
+document.getElementById('fireBtn').addEventListener('mousedown',shoot);
+function shoot(){
+let b=document.createElement('div');b.className='bullet';
+b.style.left=px+'%';b.style.top=py+'%';
+game.appendChild(b);bullets.push({el:b,x:px,y:py,vx:0,vy:-3});
+}
+
+function spawnEnemy(){
+let e=document.createElement('div');e.className='enemy';e.textContent='💀';
+let ex=Math.random()*90+5,ey=Math.random()*30+5;
+e.style.left=ex+'%';e.style.top=ey+'%';
+game.appendChild(e);enemies.push({el:e,x:ex,y:ey});
+document.getElementById('ec').innerText=enemies.length;
+}
+
+setInterval(()=>{
+enemies.forEach(en=>{
+let dx=px-en.x,dy=py-en.y;let d=Math.sqrt(dx*dx+dy*dy);
+if(d>1){en.x+=dx/d*0.3;en.y+=dy/d*0.3;en.el.style.left=en.x+'%';en.el.style.top=en.y+'%';}
+if(d<5){hp-=1;document.getElementById('health').innerText='HP: '+hp;if(hp<=0){alert('Game Over! Score: '+score);location.reload()}}
+});
+bullets.forEach((b,i)=>{
+b.y+=b.vy;b.el.style.top=b.y+'%';
+enemies.forEach((en,j)=>{
+let dx=b.x-en.x,dy=b.y-en.y;if(Math.sqrt(dx*dx+dy*dy)<4){
+en.el.remove();enemies.splice(j,1);b.el.remove();bullets.splice(i,1);score+=10;
+document.getElementById('score').innerText=score;document.getElementById('ec').innerText=enemies.length;
+}
+});
+if(b.y<0){b.el.remove();bullets.splice(i,1)}
+});
+},30);
+
+setInterval(spawnEnemy,1500);
+for(let i=0;i<3;i++)spawnEnemy();
 </script>
 </body>
   </html>
