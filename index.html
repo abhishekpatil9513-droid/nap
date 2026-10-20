@@ -2,94 +2,139 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Free Fire 2019</title>
+<title>Free Fire 15 Guns Bermuda</title>
 <style>
-body{margin:0;background:#1a1a1a;color:white;font-family:Arial;overflow:hidden;touch-action:none}
-#ui{position:absolute;top:0;left:0;right:0;padding:8px;display:flex;justify-content:space-between;background:rgba(0,0,0,0.7);z-index:10}
-#game{position:relative;width:100vw;height:100vh;background:linear-gradient(#4a8f29,#2d5a1a);overflow:hidden}
-#player{position:absolute;width:40px;height:40px;background:#ffcc00;border-radius:50%;border:3px solid #000;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;justify-content:center;font-size:20px}
-.enemy{position:absolute;width:35px;height:35px;background:#ff3300;border-radius:50%;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:18px}
-.bullet{position:absolute;width:8px;height:8px;background:yellow;border-radius:50%;box-shadow:0 0 5px yellow}
-#joystick{position:absolute;bottom:30px;left:30px;width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;z-index:10}
-#stick{position:absolute;width:40px;height:40px;background:rgba(255,255,255,0.5);border-radius:50%;left:30px;top:30px}
-#fireBtn{position:absolute;bottom:40px;right:30px;width:80px;height:80px;background:rgba(255,0,0,0.6);border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:10}
-#health{color:#00ff00}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:white;font-family:Arial;overflow:hidden;touch-action:none}
+#ui{position:absolute;top:0;left:0;right:0;height:65px;background:#000;display:flex;align-items:center;justify-content:space-between;padding:0 6px;z-index:20;border-bottom:2px solid #ff9900;font-size:11px}
+#game{position:relative;width:100vw;height:100vh;background:#4a7c2e;overflow:hidden}
+.building{position:absolute;background:#6b4a2e;border:2px solid #3a2a1e;z-index:2}
+.tree{position:absolute;width:28px;height:28px;background:#1a5a1a;border-radius:50%;z-index:2;display:flex;align-items:center;justify-content:center;font-size:16px}
+#player{position:absolute;width:40px;height:40px;background:#ffcc00;border:3px solid black;border-radius:50%;z-index:10;display:flex;align-items:center;justify-content:center;font-size:20px}
+.enemy{position:absolute;width:33px;height:33px;background:#ff2222;border:2px solid black;border-radius:50%;z-index:5;display:flex;align-items:center;justify-content:center;font-size:13px}
+.bullet{position:absolute;width:10px;height:5px;background:yellow;border-radius:3px;z-index:6;box-shadow:0 0 6px yellow}
+#joystick{position:absolute;bottom:85px;left:12px;width:95px;height:95px;background:rgba(255,255,255,0.12);border-radius:50%;border:2px solid rgba(255,255,255,0.25);z-index:20}
+#stick{position:absolute;width:38px;height:38px;background:rgba(255,255,255,0.55);border-radius:50%;left:28px;top:28px}
+#fireBtn{position:absolute;bottom:85px;right:12px;width:75px;height:75px;background:radial-gradient(#ff4444,#990000);border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:28px;z-index:20}
+#reloadBtn{position:absolute;bottom:170px;right:12px;width:50px;height:50px;background:rgba(255,200,0,0.85);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:20}
+#glooBtn{position:absolute;bottom:170px;right:70px;width:50px;height:50px;background:rgba(100,200,255,0.7);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:20}
+#gunsWrap{position:absolute;bottom:0;left:0;right:0;height:70px;background:rgba(0,0,0,0.9);z-index:20;overflow-x:auto;overflow-y:hidden;white-space:nowrap;-webkit-overflow-scrolling:touch}
+#guns{display:flex;gap:5px;padding:5px}
+.gun{flex:0 0 auto;padding:4px 7px;background:rgba(40,40,40,0.9);border:2px solid #555;border-radius:8px;font-size:9px;text-align:center;min-width:68px}
+.gun.active{border-color:#ffcc00;background:#ffcc00;color:black;font-weight:bold}
+.gun .type{font-size:7px;color:#ff9900}.gun.active .type{color:#333}
+#hpBar{width:60px;height:7px;background:#333;border-radius:4px;overflow:hidden}
+#hpFill{height:100%;background:#00ff00;width:100%;transition:width 0.3s}
 </style>
 </head>
 <body>
-<div id="ui"><div>FF 2019 - Score: <span id="score">0</span></div><div id="health">HP: 100</div><div>Enemies: <span id="ec">0</span></div></div>
+<div id="ui">
+<div>BERMUDA<br>S:<span id="score">0</span></div>
+<div>HP<div id="hpBar"><div id="hpFill"></div></div><span id="hpText">100</span></div>
+<div id="gunInfo" style="text-align:center;font-size:10px">AK-47<br><span id="ammo">30/90</span><br><span id="dmgTxt">20 DMG</span></div>
+<div>E:<span id="ec">0</span></div>
+</div>
 <div id="game">
 <div id="player">🔫</div>
 <div id="joystick"><div id="stick"></div></div>
 <div id="fireBtn">💥</div>
+<div id="reloadBtn">🔄</div>
+<div id="glooBtn">🧊</div>
 </div>
+<div id="gunsWrap"><div id="guns"></div></div>
 <script>
 let score=0,hp=100,px=50,py=50;
-let player=document.getElementById('player');
-let game=document.getElementById('game');
+let player=document.getElementById('player'),game=document.getElementById('game');
 let enemies=[],bullets=[];
 let isMoving=false,mx=0,my=0;
+let curGun='ak';
 
-let joy=document.getElementById('joystick');
-let stick=document.getElementById('stick');
-joy.addEventListener('touchstart',e=>{isMoving=true});
+let guns={
+ak:{name:'AK-47',dmg:20,mag:30,max:30,res:90,reload:2000,type:'AR'},
+m4:{name:'M4A1',dmg:15,mag:30,max:30,res:90,reload:1800,type:'AR'},
+scar:{name:'SCAR',dmg:18,mag:30,max:30,res:90,reload:1900,type:'AR'},
+groza:{name:'GROZA',dmg:22,mag:30,max:30,res:90,reload:2100,type:'AR'},
+famas:{name:'FAMAS',dmg:16,mag:30,max:30,res:90,reload:1700,type:'AR'},
+mp40:{name:'MP40',dmg:8,mag:40,max:40,res:120,reload:1500,type:'SMG'},
+ump:{name:'UMP',dmg:10,mag:35,max:35,res:105,reload:1600,type:'SMG'},
+mp5:{name:'MP5',dmg:9,mag:35,max:35,res:105,reload:1550,type:'SMG'},
+p90:{name:'P90',dmg:7,mag:50,max:50,res:150,reload:2000,type:'SMG'},
+m1014:{name:'M1014',dmg:35,mag:6,max:6,res:24,reload:2800,type:'SG'},
+spas:{name:'SPAS12',dmg:40,mag:6,max:6,res:24,reload:3000,type:'SG'},
+awm:{name:'AWM',dmg:50,mag:5,max:5,res:20,reload:3000,type:'SNP'},
+m82b:{name:'M82B',dmg:45,mag:8,max:8,res:24,reload:2800,type:'SNP'},
+kar:{name:'Kar98k',dmg:38,mag:6,max:6,res:24,reload:2600,type:'SNP'},
+deagle:{name:'DEAGLE',dmg:28,mag:7,max:7,res:28,reload:1800,type:'HG'}
+};
+let isReloading=false;
+
+function renderGuns(){
+let c=document.getElementById('guns');c.innerHTML='';
+Object.keys(guns).forEach(id=>{
+let g=guns[id];
+let d=document.createElement('div');d.className='gun'+(id==curGun?' active':'');
+d.dataset.gun=id;
+d.innerHTML=`<span class="type">${g.type}</span><br>${g.name}<br>${g.dmg} DMG<br>${g.mag}/${g.res}`;
+d.addEventListener('touchstart',()=>setGun(id));
+d.addEventListener('mousedown',()=>setGun(id));
+c.appendChild(d);
+});
+}
+function setGun(id){
+if(isReloading)return;
+curGun=id;
+let g=guns[id];
+document.getElementById('gunInfo').innerHTML=`${g.name}<br><span id="ammo">${g.mag}/${g.res}</span><br><span id="dmgTxt">${g.dmg} DMG</span>`;
+renderGuns();
+}
+function updateAmmo(){renderGuns();let g=guns[curGun];document.getElementById('gunInfo').innerHTML=`${g.name}<br><span id="ammo">${g.mag}/${g.res}</span><br><span id="dmgTxt">${g.dmg} DMG</span>`;}
+function reloadGun(){
+if(isReloading)return;
+let g=guns[curGun];
+if(g.mag==g.max||g.res==0)return;
+isReloading=true;
+document.getElementById('reloadBtn').innerText='⏳';
+setTimeout(()=>{
+let need=g.max-g.mag;
+let take=Math.min(need,g.res);
+g.mag+=take;g.res-=take;
+isReloading=false;
+document.getElementById('reloadBtn').innerText='🔄';
+updateAmmo();
+},g.reload);
+}
+function createMap(){
+let spots=[{x:10,y:15,w:110,h:75},{x:65,y:18,w:95,h:65},{x:18,y:68,w:85,h:55},{x:68,y:62,w:105,h:85}];
+spots.forEach(s=>{let b=document.createElement('div');b.className='building';b.style.left=s.x+'%';b.style.top=s.y+'%';b.style.width=s.w+'px';b.style.height=s.h+'px';b.innerHTML='<div style="text-align:center;font-size:9px">🏠</div>';game.appendChild(b);});
+for(let i=0;i<10;i++){let t=document.createElement('div');t.className='tree';t.style.left=(Math.random()*85+5)+'%';t.style.top=(Math.random()*60+15)+'%';t.textContent='🌳';game.appendChild(t)}
+}
+let joy=document.getElementById('joystick'),stick=document.getElementById('stick');
+joy.addEventListener('touchstart',()=>isMoving=true);
 joy.addEventListener('touchmove',e=>{
-let rect=joy.getBoundingClientRect();
-let x=e.touches[0].clientX-rect.left-50;
-let y=e.touches[0].clientY-rect.top-50;
-let dist=Math.sqrt(x*x+y*y);
-if(dist>35){x=x/dist*35;y=y/dist*35}
-stick.style.left=(30+x)+'px'; stick.style.top=(30+y)+'px';
-mx=x/35; my=y/35;
+let r=joy.getBoundingClientRect();let x=e.touches[0].clientX-r.left-47;let y=e.touches[0].clientY-r.top-47;
+let d=Math.sqrt(x*x+y*y);if(d>30){x=x/d*30;y=y/d*30}stick.style.left=(28+x)+'px';stick.style.top=(28+y)+'px';mx=x/30;my=y/30;
 });
-joy.addEventListener('touchend',()=>{isMoving=false;mx=0;my=0;stick.style.left='30px';stick.style.top='30px'});
-
-function gameLoop(){
-if(isMoving){
-px+=mx*2; py+=my*2;
-if(px<5)px=5;if(px>95)px=95;if(py<15)py=15;if(py>85)py=85;
-player.style.left=px+'%';player.style.top=py+'%';
-}
-requestAnimationFrame(gameLoop);
-}
-gameLoop();
-
-document.getElementById('fireBtn').addEventListener('touchstart',shoot);
-document.getElementById('fireBtn').addEventListener('mousedown',shoot);
+joy.addEventListener('touchend',()=>{isMoving=false;mx=0;my=0;stick.style.left='28px';stick.style.top='28px'});
+function loop(){if(isMoving){px+=mx*1.1;py+=my*1.1;if(px<2)px=2;if(px>96)px=96;if(py<10)py=10;if(py>88)py=88;player.style.left=px+'%';player.style.top=py+'%';}requestAnimationFrame(loop);}loop();
 function shoot(){
-let b=document.createElement('div');b.className='bullet';
-b.style.left=px+'%';b.style.top=py+'%';
-game.appendChild(b);bullets.push({el:b,x:px,y:py,vx:0,vy:-3});
+if(isReloading)return;
+let g=guns[curGun];
+if(g.mag<=0){reloadGun();return;}
+g.mag--;updateAmmo();
+let b=document.createElement('div');b.className='bullet';b.style.left=px+'%';b.style.top=py+'%';game.appendChild(b);
+bullets.push({el:b,x:px,y:py,vy:-3.8,dmg:g.dmg});
+if(g.mag==0){setTimeout(reloadGun,400)}
 }
-
-function spawnEnemy(){
-let e=document.createElement('div');e.className='enemy';e.textContent='💀';
-let ex=Math.random()*90+5,ey=Math.random()*30+5;
-e.style.left=ex+'%';e.style.top=ey+'%';
-game.appendChild(e);enemies.push({el:e,x:ex,y:ey});
-document.getElementById('ec').innerText=enemies.length;
-}
-
+document.getElementById('fireBtn').addEventListener('touchstart',shoot);
+document.getElementById('reloadBtn').addEventListener('touchstart',reloadGun);
+document.getElementById('glooBtn').addEventListener('touchstart',()=>{let gg=document.createElement('div');gg.style.position='absolute';gg.style.width='50px';gg.style.height='50px';gg.style.background='rgba(100,200,255,0.9)';gg.style.border='3px solid white';gg.style.borderRadius='5px';gg.style.left=(px+3)+'%';gg.style.top=(py-8)+'%';gg.style.zIndex='3';game.appendChild(gg);setTimeout(()=>gg.remove(),5000);});
+function updateHP(){document.getElementById('hpText').innerText=Math.floor(hp);document.getElementById('hpFill').style.width=hp+'%';}
+function spawnEnemy(){let e=document.createElement('div');e.className='enemy';e.textContent='💀';let ex=Math.random()*80+10,ey=Math.random()*25+10;e.style.left=ex+'%';e.style.top=ey+'%';game.appendChild(e);enemies.push({el:e,x:ex,y:ey,hp:100});document.getElementById('ec').innerText=enemies.length;}
 setInterval(()=>{
-enemies.forEach(en=>{
-let dx=px-en.x,dy=py-en.y;let d=Math.sqrt(dx*dx+dy*dy);
-if(d>1){en.x+=dx/d*0.3;en.y+=dy/d*0.3;en.el.style.left=en.x+'%';en.el.style.top=en.y+'%';}
-if(d<5){hp-=1;document.getElementById('health').innerText='HP: '+hp;if(hp<=0){alert('Game Over! Score: '+score);location.reload()}}
-});
-bullets.forEach((b,i)=>{
-b.y+=b.vy;b.el.style.top=b.y+'%';
-enemies.forEach((en,j)=>{
-let dx=b.x-en.x,dy=b.y-en.y;if(Math.sqrt(dx*dx+dy*dy)<4){
-en.el.remove();enemies.splice(j,1);b.el.remove();bullets.splice(i,1);score+=10;
-document.getElementById('score').innerText=score;document.getElementById('ec').innerText=enemies.length;
-}
-});
-if(b.y<0){b.el.remove();bullets.splice(i,1)}
-});
-},30);
-
-setInterval(spawnEnemy,1500);
-for(let i=0;i<3;i++)spawnEnemy();
+enemies.forEach(en=>{let dx=px-en.x,dy=py-en.y,d=Math.sqrt(dx*dx+dy*dy);if(d>2){en.x+=dx/d*0.12;en.y+=dy/d*0.12;en.el.style.left=en.x+'%';en.el.style.top=en.y+'%';}if(d<4.2){hp-=0.1;if(hp<0)hp=0;updateHP();if(hp<=0){alert('BOOYAH! Score:'+score);location.reload()}}});
+bullets.forEach((b,i)=>{b.y+=b.vy;b.el.style.top=b.y+'%';enemies.forEach((en,j)=>{let dx=b.x-en.x,dy=b.y-en.y;if(Math.sqrt(dx*dx+dy*dy)<4){en.hp-=b.dmg;if(en.hp<=0){en.el.remove();enemies.splice(j,1);score+=10;document.getElementById('score').innerText=score;document.getElementById('ec').innerText=enemies.length;}b.el.remove();bullets.splice(i,1);}});if(b.y<0){b.el.remove();bullets.splice(i,1)}});
+},25);
+createMap();setInterval(spawnEnemy,2200);for(let i=0;i<3;i++)spawnEnemy();renderGuns();updateHP();
 </script>
 </body>
   </html>
