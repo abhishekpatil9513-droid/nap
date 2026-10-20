@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
+<title>Free Fire MAX - Bermuda</title>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Arial Black',Arial}
+body{overflow:hidden;background:#000;touch-action:none;user-select:none}
+#gameWrap{position:relative;width:100vw;height:100vh}
+/* MAX UI TOP */
+#topUI{position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);z-index:30;display:flex;justify-content:space-between;padding:8px 12px;color:white}
+#aliveBox{background:rgba(0,0,0,0.7);border:1.5px solid #ffcc00;padding:4px 10px;border-radius:6px;font-size:11px}
+#safeBox{text-align:center;font-size:11px}
+#safeTimer{color:#ffcc00;font-size:14px}
+#hpArmor{position:absolute;top:60px;left:12px;z-index:30;width:180px}
+#hpBar{width:100%;height:14px;background:#222;border:1.5px solid #fff;border-radius:3px;overflow:hidden;display:flex}
+#hpFill{height:100%;width:100%;background:linear-gradient(90deg,#00ff00,#44ff44);transition:width 0.2s}
+#armorBar{width:100%;height:8px;background:#222;border:1px solid #00ccff;margin-top:3px;border-radius:3px;overflow:hidden}
+#armorFill{height:100%;width:100%;background:#00ccff}
+#epText{font-size:10px;color:#ffcc00;margin-top:2px}
+#minimap{position:absolute;top:10px;right:10px;width:85px;height:85px;background:rgba(0,0,0,0.8);border:2px solid white;border-radius:50%;z-index:30;overflow:hidden}
+#minimap canvas{width:100%;height:100%}
+/* Crosshair MAX style */
+#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;pointer-events:none}
+#cross::before,#cross::after{content:'';position:absolute;background:white}
+#cross::before{width:18px;height:2px;left:-9px;top:0}#cross::after{width:2px;height:18px;left:0;top:-9px}
+#dot{width:4px;height:4px;background:#ff0000;border-radius:50%;position:absolute;left:-2px;top:-2px}
+/* Joysticks like MAX */
+.joy{position:absolute;width:120px;height:120px;background:radial-gradient(rgba(255,255,255,0.15), transparent 70%);border:1.5px solid rgba(255,255,255,0.25);border-radius:50%;z-index:30}
+#joyMove{bottom:25px;left:12px}#joyLook{bottom:25px;right:95px;width:90px;height:90px;opacity:0.5}
+.stick{position:absolute;width:50px;height:50px;background:radial-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.4));border-radius:50%;left:35px;top:35px;box-shadow:0 2px 10px rgba(0,0,0,0.5)}
+/* Fire Buttons like MAX */
+.fireBtn{position:absolute;width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:30;border:3px solid white}
+#fireR{bottom:95px;right:12px;background:radial-gradient(#ff4444,#990000);font-size:22px;color:white}
+#fireL{bottom:25px;right:12px;width:52px;height:52px;background:radial-gradient(#ff6666,#880000);font-size:16px;color:white;opacity:0.8}
+/* Action buttons like MAX - Right side vertical */
+#actionCol{position:absolute;right:85px;bottom:25px;display:flex;flex-direction:column;gap:10px;z-index:30}
+.act{width:46px;height:46px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:white}
+#glooBtn{background:rgba(0,200,255,0.6);border-color:#00ffff;font-size:18px}
+/* Guns bar like MAX */
+#weaponBar{position:absolute;bottom:0;left:0;right:0;height:78px;background:linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.5));display:flex;align-items:center;overflow-x:auto;gap:6px;padding:6px 8px;z-index:30}
+.wSlot{flex:0 0 auto;min-width:82px;height:62px;background:linear-gradient(#2a2a2a,#1a1a1a);border:2px solid #444;border-radius:10px;padding:4px;text-align:center;color:white;font-size:9px;position:relative}
+.wSlot.active{border-color:#ffcc00;background:linear-gradient(#ffcc00,#ff9900);color:black;transform:scale(1.05)}
+.wSlot .wName{font-weight:bold;font-size:11px}.wSlot .wAmmo{color:#ffcc00;font-size:10px}.wSlot.active .wAmmo{color:black}
+#sprintBtn{position:absolute;top:130px;left:12px;width:44px;height:44px;background:rgba(255,204,0,0.2);border:2px solid #ffcc00;border-radius:50%;z-index:30;display:flex;align-items:center;justify-content:center;font-size:20px}
+</style>
+</head>
+<body>
+<div id="gameWrap">
+<div id="topUI"><div id="aliveBox">ALIVE<br><span id="alive" style="font-size:18px;color:#ffcc00">12</span></div><div id="safeBox">SAFE ZONE<br><span id="safeTimer">03:21</span><br><span style="font-size:9px">BERMUDA</span></div><div style="text-align:right;font-size:10px">KILL <span id="kill" style="color:#ffcc00">0</span><br>MAX</div></div>
+<div id="hpArmor"><div id="hpBar"><div id="hpFill"></div></div><div id="armorBar"><div id="armorFill"></div></div><div id="epText">HP 200/200 | Vest Lv3</div></div>
+<div id="minimap"><canvas id="mini" width="85" height="85"></canvas></div>
+<div id="cross"><div id="dot"></div></div>
+<div id="joyMove" class="joy"><div id="stickMove" class="stick"></div></div>
+<div id="joyLook" class="joy"><div id="stickLook" class="stick"></div></div>
+<div id="fireR" class="fireBtn">◉</div><div id="fireL" class="fireBtn">◉</div>
+<div id="actionCol"><div class="act" id="glooBtn">🧱</div><div class="act" id="jumpBtn">⬆</div><div class="act" id="crouchBtn">⬇</div><div class="act" id="scopeBtn">◎</div></div>
+<div id="sprintBtn">🏃</div>
+<div id="weaponBar"></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+let scene=new THREE.Scene();scene.background=new THREE.Color(0x6ec6ff);scene.fog=new THREE.Fog(0x6ec6ff,80,220);
+let camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,1000);
+let renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,0.75));
+let sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(60,100,40);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-150;sun.shadow.camera.right=150;sun.shadow.camera.top=150;sun.shadow.camera.bottom=-150;scene.add(sun);
+// Bermuda MAX ground - textured
+let groundTex=new THREE.MeshLambertMaterial({color:0x4a9a2a});
+let ground=new THREE.Mesh(new THREE.PlaneGeometry(500,500),groundTex);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+// Roads like Bermuda
+let roadMat=new THREE.MeshLambertMaterial({color:0x333333});
+[0,1].forEach(i=>{let r=new THREE.Mesh(new THREE.PlaneGeometry(500,12),roadMat);r.rotation.x=-Math.PI/2;r.position.set(0,i==0?-80:80,0.05);scene.add(r);});
+// Clock Tower - MAIN Bermuda building (like MAX)
+function box(x,z,w,h,d,col){let m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:col}));m.position.set(x,h/2,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;}
+box(-75,-60,32,22,32,0xd2a679);box(-75,-60,8,30,8,0x8b4513); // Clock Tower with pillar
+box(70,-55,28,18,28,0x7a7a7a);box(75,60,30,20,24,0x444444); // Factory
+box(-70,65,26,16,26,0xc19a6b);box(0,-85,42,18,18,0x222222); // Hangar
+box(0,85,36,16,36,0xb08d57);box(60,0,20,12,20,0x8b5a2b);box(-60,0,20,12,20,0x8b5a2b);
+// Trees + rocks
+for(let i=0;i<55;i++){let x=(Math.random()-0.5)*460,z=(Math.random()-0.5)*460;if(Math.abs(x)<20&&Math.abs(z)<20)continue;let trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.8,5,6),new THREE.MeshLambertMaterial({color:0x3d2817}));trunk.position.set(x,2.5,z);trunk.castShadow=true;scene.add(trunk);let leaves=new THREE.Mesh(new THREE.IcosahedronGeometry(3.8,0),new THREE.MeshLambertMaterial({color:0x0e4a0e}));leaves.position.set(x,8,z);leaves.castShadow=true;scene.add(leaves);}
+// Player - Like Free Fire MAX character (yellow shirt, blue pants)
+let player=new THREE.Group();scene.add(player);
+let torso=new THREE.Mesh(new THREE.CapsuleGeometry(0.55,1.1,4,10),new THREE.MeshLambertMaterial({color:0xffcc00}));torso.position.y=1.4;torso.castShadow=true;player.add(torso);
+let head=new THREE.Mesh(new THREE.SphereGeometry(0.48,16,16),new THREE.MeshLambertMaterial({color:0xffd8b0}));head.position.y=2.85;head.castShadow=true;player.add(head);
+let cap=new THREE.Mesh(new THREE.SphereGeometry(0.52,16,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({color:0x111111}));cap.position.y=3.05;cap.rotation.x=Math.PI;player.add(cap);
+let legL=new THREE.Mesh(new THREE.CapsuleGeometry(0.22,0.9,4,8),new THREE.MeshLambertMaterial({color:0x1a3cff}));legL.position.set(-0.22,0.45,0);player.add(legL);
+let legR=new THREE.Mesh(new THREE.CapsuleGeometry(0.22,0.9,4,8),new THREE.MeshLambertMaterial({color:0x1a3cff}));legR.position.set(0.22,0.45,0);player.add(legR);
+let gun=new THREE.Group();let gunBody=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.12,0.9),new THREE.MeshLambertMaterial({color:0x111111}));gunBody.position.set(0,0,0.3);gun.add(gunBody);gun.position.set(0.45,1.4,0.4);player.add(gun);
+let px=0,pz=45,yaw=0,pitch=0,score=0,hp=200,armor=100,mX=0,mZ=0,lX=0,lY=0,isSprint=false,isCrouch=false;let enemies=[],bullets=[],glooWalls=[];
+let guns={ak:{n:'AK47',d:28,m:30,r:90,icon:'🔫'},m4:{n:'M4A1',d:22,m:30,r:90,icon:'🔫'},scar:{n:'SCAR',d:24,m:30,r:90,icon:'🔫'},groza:{n:'GROZA',d:30,m:30,r:90,icon:'🔫'},famas:{n:'FAMAS',d:26,m:30,r:90,icon:'🔫'},mp40:{n:'MP40',d:18,m:40,r:120,icon:'🔫'},ump:{n:'UMP',d:20,m:35,r:105,icon:'🔫'},mp5:{n:'MP5',d:19,m:35,r:105,icon:'🔫'},p90:{n:'P90',d:16,m:50,r:150,icon:'🔫'},m1014:{n:'M1014',d:55,m:6,r:24,icon:'💥'},spas:{n:'SPAS',d:62,m:6,r:24,icon:'💥'},awm:{n:'AWM',d:85,m:5,r:20,icon:'🎯'},m82b:{n:'M82B',d:78,m:8,r:24,icon:'🎯'},kar:{n:'KAR98',d:72,m:6,r:24,icon:'🎯'},deagle:{n:'DEAGLE',d:45,m:7,r:28,icon:'🔫'}};let cur='ak';
+function buildWeaponBar(){let bar=document.getElementById('weaponBar');bar.innerHTML='';Object.keys(guns).forEach(k=>{let g=guns[k];let d=document.createElement('div');d.className='wSlot'+(k==cur?' active':'');d.innerHTML=`<div class="wName">${g.icon} ${g.n}</div><div>DMG ${g.d}</div><div class="wAmmo">${g.m}/${g.r}</div>`;d.onclick=()=>{cur=k;buildWeaponBar()};bar.appendChild(d);});}
+function spawn(n){for(let i=0;i<n;i++){let x=(Math.random()-0.5)*160,z=(Math.random()-0.5)*160;let grp=new THREE.Group();let b=new THREE.Mesh(new THREE.CapsuleGeometry(0.55,1.1,4,8),new THREE.MeshLambertMaterial({color:0xff2222}));b.position.y=1.4;grp.add(b);let h=new THREE.Mesh(new THREE.SphereGeometry(0.48,8,8),new THREE.MeshLambertMaterial({color:0xffaaaa}));h.position.y=2.85;grp.add(h);grp.position.set(x,0,z);scene.add(grp);enemies.push({mesh:grp,x:x,z:z,hp:120});}document.getElementById('alive').innerText=enemies.length;}
+function shoot(){let g=guns[cur];if(g.m<=0)return;g.m--;buildWeaponBar();let dir=new THREE.Vector3(0,0,-1);dir.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);dir.y=pitch*0.5;let s=new THREE.Vector3(px,1.7,pz);s.add(dir.clone().multiplyScalar(1.2));let b=new THREE.Mesh(new THREE.SphereGeometry(0.16,6,6),new THREE.MeshBasicMaterial({color:0xffff00}));b.position.copy(s);scene.add(b);bullets.push({mesh:b,pos:s.clone(),dir:dir.clone(),dmg:g.d,l:90});}
+function addGloo(){let dir=new THREE.Vector3(0,0,-1);dir.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);let p=new THREE.Vector3(px,pz,0).add(new THREE.Vector3(dir.x,0,dir.z).multiplyScalar(6));let wall=new THREE.Mesh(new THREE.BoxGeometry(4,3.5,0.6),new THREE.MeshLambertMaterial({color:0x00ffff}));wall.position.set(p.x,1.75,p.y);wall.rotation.y=yaw;wall.castShadow=true;wall.receiveShadow=true;scene.add(wall);glooWalls.push({mesh:wall,x:p.x,z:p.y,hp:200});setTimeout(()=>{scene.remove(wall)},15000);}
+function loop(){
+requestAnimationFrame(loop);
+let spd=isSprint?0.52:0.26;if(isCrouch)spd=0.13;
+px+=(mX*spd*Math.cos(yaw)+mZ*spd*Math.sin(yaw));
+pz+=(mZ*spd*Math.cos(yaw)-mX*spd*Math.sin(yaw));
+yaw+=lX*0.055;pitch+=lY*0.04;pitch=Math.max(-0.6,Math.min(0.6,pitch));
+player.position.set(px,isCrouch?0.45:0,pz);player.rotation.y=yaw;
+let camDist=isCrouch?3.2:5.8;let camH=isCrouch?1.9:3.2+ pitch*2;
+let camX=px-Math.sin(yaw)*camDist;let camZ=pz-Math.cos(yaw)*camDist;
+camera.position.set(camX,camH,camZ);camera.lookAt(px,1.6+pitch,pz);
+// bullets
+bullets.forEach((b,i)=>{b.pos.add(b.dir.clone().multiplyScalar(2.4));b.mesh.position.copy(b.pos);b.l--;if(b.l<=0){scene.remove(b.mesh);bullets.splice(i,1);return;}enemies.forEach((en,j)=>{if(b.pos.distanceTo(new THREE.Vector3(en.x,1.4,en.z))<1.8){en.hp-=b.dmg;if(en.hp<=0){scene.remove(en.mesh);enemies.splice(j,1);score++;document.getElementById('kill').innerText=score;document.getElementById('alive').innerText=enemies.length;setTimeout(()=>spawn(1),1200);}scene.remove(b.mesh);bullets.splice(i,1);}});glooWalls.forEach(w=>{if(b.pos.distanceTo(new THREE.Vector3(w.x,1.75,w.z))<2.2){scene.remove(b.mesh);bullets.splice(i,1);}});});
+enemies.forEach(en=>{let dx=px-en.x,dz=pz-en.z,d=Math.sqrt(dx*dx+dz*dz);if(d>2.8){en.x+=dx/d*0.06;en.z+=dz/d*0.06;en.mesh.position.set(en.x,0,en.z);en.mesh.lookAt(px,0,pz);}if(d<3){if(armor>0){armor-=0.12;if(armor<0)armor=0;document.getElementById('armorFill').style.width=armor+'%'}else{hp-=0.18;if(hp<0)hp=0;document.getElementById('hpFill').style.width=(hp/2)+'%';document.getElementById('epText').innerText=`HP ${Math.floor(hp)}/200 | Vest Lv3`;if(hp<=0){alert('BOOYAH! Kills '+score);location.reload();}}}});
+// minimap
+let ctx=document.getElementById('mini').getContext('2d');ctx.fillStyle='#4a9a2a';ctx.fillRect(0,0,85,85);ctx.fillStyle='yellow';ctx.fillRect(42+px*0.15,42+pz*0.15,4,4);ctx.fillStyle='red';enemies.forEach(en=>{ctx.fillRect(42+en.x*0.15,42+en.z*0.15,2,2);});
+renderer.render(scene,camera);
+}
+function joy(jId,sId,cb){let j=document.getElementById(jId),s=document.getElementById(sId);j.addEventListener('touchmove',e=>{e.preventDefault();let r=j.getBoundingClientRect();let x=e.touches[0].clientX-r.left-r.width/2,y=e.touches[0].clientY-r.top-r.height/2;let d=Math.sqrt(x*x+y*y);if(d>42){x=x/d*42;y=y/d*42}s.style.transform=`translate(${x}px,${y}px)`;cb(x/42,y/42);},{passive:false});j.addEventListener('touchend',()=>{s.style.transform='translate(0,0)';cb(0,0);});}
+joy('joyMove','stickMove',(x,y)=>{mX=x;mZ=-y;});joy('joyLook','stickLook',(x,y)=>{lX=-x;lY=-y;});
+document.getElementById('fireR').addEventListener('touchstart',e=>{e.preventDefault();shoot();});document.getElementById('fireL').addEventListener('touchstart',e=>{e.preventDefault();shoot();});
+document.getElementById('jumpBtn').onclick=()=>{player.position.y=1.5;setTimeout(()=>player.position.y=isCrouch?0.45:0,280);};
+document.getElementById('crouchBtn').onclick=()=>{isCrouch=!isCrouch;document.getElementById('crouchBtn').style.background=isCrouch?'#ffcc00':'rgba(0,0,0,0.6)'};
+document.getElementById('glooBtn').onclick=addGloo;
+document.getElementById('sprintBtn').onclick=()=>{isSprint=!isSprint;document.getElementById('sprintBtn').style.background=isSprint?'#ffcc00':'rgba(255,204,0,0.2)'};
+document.getElementById('scopeBtn').onclick=()=>{camera.fov=camera.fov==72?30:72;camera.updateProjectionMatrix();};
+buildWeaponBar();spawn(10);loop();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+  </html>
